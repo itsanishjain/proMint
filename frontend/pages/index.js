@@ -138,7 +138,7 @@ export default function Home() {
 
       <img src="/banner.png" />
 
-      {!nftUrl && (
+      {nftUrl && (
 
         <div className="text-center text-white m-4">
           <a
