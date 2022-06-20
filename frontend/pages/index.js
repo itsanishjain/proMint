@@ -80,21 +80,22 @@ export default function Home() {
 
 
   const switchToRinkeby = async () => {
-    window.ethereum.request({
+    await window.ethereum.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: "0x4" }]
     });
+    console.log("HERE IS RINKEBY")
   }
 
   const switchToBinance = async () => {
-    window.ethereum.request({
+    await window.ethereum.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: "0x61" }]
     });
   }
 
   const switchToMumbai = async () => {
-    window.ethereum.request({
+    await window.ethereum.request({
       method: "wallet_switchEthereumChain",
       params: [{ chainId: "0x13881" }]
     });
@@ -218,9 +219,9 @@ export default function Home() {
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      onClick={() => {
+                      onClick={async () => {
+                        await switchToRinkeby()
                         setDropOption('Rinkeby')
-                        switchToRinkeby()
                         getProviderOrSigner()
                       }}
                       className={classNames(
@@ -235,9 +236,9 @@ export default function Home() {
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      onClick={() => {
+                      onClick={async () => {
+                        await switchToBinance()
                         setDropOption('Binance')
-                        switchToBinance()
                         getProviderOrSigner()
                       }}
                       className={classNames(
@@ -253,9 +254,9 @@ export default function Home() {
                 <Menu.Item>
                   {({ active }) => (
                     <button
-                      onClick={() => {
+                      onClick={async () => {
+                        await switchToMumbai()
                         setDropOption('Mumbai')
-                        switchToMumbai()
                         getProviderOrSigner()
                       }}
                       className={classNames(
