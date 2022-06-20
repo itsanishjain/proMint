@@ -10,12 +10,20 @@ import Form from "../src/components/Form";
 
 import { NFT_CONTRACT_RINKEBY_ADDRESS, NFT_CONTRACT_BINANCE_ADDRESS, NFT_CONTRACT_POLYGON_ADDRESS, NFT_CONTRACT_ABI } from "../src/constants";
 
+import { Fragment } from 'react'
+import { Menu, Transition } from '@headlessui/react'
+import { ChevronDownIcon } from '@heroicons/react/solid'
+
+function classNames(...classes) {
+  return classes.filter(Boolean).join(' ')
+}
+
 
 export default function Home() {
   const [walletConnected, setWalletConnected] = useState(false);
 
   const [loading, setLoading] = useState(false);
-  const [tokenIdsMinted, setTokenIdsMinted] = useState("0");
+  const [txHash, setTxHash] = useState("0");
 
   const [metadataURLIPFS, setMetadataURLIPFS] = useState("");
 
@@ -24,9 +32,15 @@ export default function Home() {
 
   const [NFT_CONTRACT_ADDRESS, SET_NFT_CONTRACT_ADDRESS] = useState()
 
+  const [dropOption, setDropOption] = useState('Select Network');
+
   const web3ModalRef = useRef();
 
   const publicMint = async () => {
+    if (CHAIN_ID !== 4 && CHAIN_ID !== 97 && CHAIN_ID !== 80001) {
+      toast.error("Change the network to Rinkeby OR Binance OR Mumbai")
+      return
+    }
     if (metadataURLIPFS !== "") {
       try {
         const signer = await getProviderOrSigner(true);
@@ -38,6 +52,7 @@ export default function Home() {
         );
 
         const tx = await NFTeeContract.mintNFT(metadataURLIPFS);
+        setTxHash(tx.hash)
 
         setLoading(true);
         await tx.wait();
@@ -62,34 +77,48 @@ export default function Home() {
     }
   };
 
-  const getTokenIdsMinted = async () => {
-    try {
-      const provider = await getProviderOrSigner();
-      const nftContract = new Contract(
-        NFT_CONTRACT_ADDRESS,
-        NFT_CONTRACT_ABI,
-        provider
-      );
-      const _tokenIds = await nftContract.tokenIds();
-      setTokenIdsMinted(_tokenIds.toString());
-    } catch (err) {
-      console.error(err);
-    }
-  };
+
+
+  const switchToRinkeby = async () => {
+    window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: "0x4" }]
+    });
+  }
+
+  const switchToBinance = async () => {
+    window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: "0x61" }]
+    });
+  }
+
+  const switchToMumbai = async () => {
+    window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: "0x13881" }]
+    });
+  }
 
   const getProviderOrSigner = async (needSigner = false) => {
     const provider = await web3ModalRef.current.connect();
     const web3Provider = new providers.Web3Provider(provider);
     const { chainId } = await web3Provider.getNetwork();
     SET_CHAINID(chainId);
-    if (chainId !== 4 && chainId !== 97 && chainId !== 80001) {
-      toast.error("Change the network to Rinkeby OR Binance OR Mumbai")
-      throw new Error("Change network to Rinkeby");
-    }
 
-    if (chainId == 4) SET_NFT_CONTRACT_ADDRESS(NFT_CONTRACT_RINKEBY_ADDRESS)
-    if (chainId == 97) SET_NFT_CONTRACT_ADDRESS(NFT_CONTRACT_BINANCE_ADDRESS)
-    if (chainId == 80001) SET_NFT_CONTRACT_ADDRESS(NFT_CONTRACT_POLYGON_ADDRESS)
+
+    if (chainId == 4) {
+      SET_NFT_CONTRACT_ADDRESS(NFT_CONTRACT_RINKEBY_ADDRESS)
+      setDropOption('Rinkeby')
+    }
+    if (chainId == 97) {
+      SET_NFT_CONTRACT_ADDRESS(NFT_CONTRACT_BINANCE_ADDRESS)
+      setDropOption('Binance')
+    }
+    if (chainId == 80001) {
+      SET_NFT_CONTRACT_ADDRESS(NFT_CONTRACT_POLYGON_ADDRESS)
+      setDropOption('Mumbai')
+    }
 
 
     if (needSigner) {
@@ -141,12 +170,23 @@ export default function Home() {
       {nftUrl && (
 
         <div className="text-center text-white m-4">
-          <a
-            className="text-lg font-medium  text-white cursor-pointer underline"
-            href={`https://testnets.opensea.io/assets/${CHAIN_ID == 4 ? 'rinkeby' : 'mumbai'}/${NFT_CONTRACT_ADDRESS}/${1}`}
-          >
-            Here is your NFT ➡️
-          </a>
+          {
+            CHAIN_ID === 4 || CHAIN_ID === 80001 ? (
+              <a
+                className="text-lg font-medium  text-white cursor-pointer underline"
+                href={`https://testnets.opensea.io/assets/${CHAIN_ID == 4 ? 'rinkeby' : 'mumbai'}/${NFT_CONTRACT_ADDRESS}/${1}`}
+              >
+                Here is your NFT ➡️
+              </a>
+            ) :
+              <a
+                className="text-lg font-medium  text-white cursor-pointer underline"
+                href={`https://testnet.bscscan.com/tx/${txHash}`}
+              >
+                Here is your NFT ➡️
+              </a>
+          }
+
         </div>
       )}
 
@@ -155,7 +195,87 @@ export default function Home() {
       <Form setMetadataURLIPFS={setMetadataURLIPFS} />
 
       <div className="max-w-sm mx-auto text-center mt-8 text-xl font-medium ">
+
+        <Menu as="div" className="relative inline-block text-left">
+          <div>
+            <Menu.Button className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
+              {dropOption}
+              <ChevronDownIcon className="-mr-1 ml-2 h-5 w-5" aria-hidden="true" />
+            </Menu.Button>
+          </div>
+
+          <Transition
+            as={Fragment}
+            enter="transition ease-out duration-100"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-75"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95"
+          >
+            <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+              <div className="py-1">
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => {
+                        setDropOption('Rinkeby')
+                        switchToRinkeby()
+                        getProviderOrSigner()
+                      }}
+                      className={classNames(
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'block px-4 py-2 text-sm'
+                      )}
+                    >
+                      Rinkeby
+                    </button>
+                  )}
+                </Menu.Item>
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => {
+                        setDropOption('Binance')
+                        switchToBinance()
+                        getProviderOrSigner()
+                      }}
+                      className={classNames(
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'block px-4 py-2 text-sm'
+                      )}
+                    >
+                      Binance
+                    </button>
+                  )}
+                </Menu.Item>
+
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={() => {
+                        setDropOption('Mumbai')
+                        switchToMumbai()
+                        getProviderOrSigner()
+                      }}
+                      className={classNames(
+                        active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                        'block w-full text-left px-4 py-2 text-sm'
+                      )}
+                    >
+                      Mumbai
+                    </button>
+                  )}
+                </Menu.Item>
+
+              </div>
+            </Menu.Items>
+          </Transition>
+        </Menu>
+
         {renderButton()}
+
+
       </div>
     </div>
   );

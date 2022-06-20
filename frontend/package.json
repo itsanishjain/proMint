@@ -8,6 +8,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^1.6.5",
+    "@heroicons/react": "^1.0.6",
     "@pinata/sdk": "^1.1.23",
     "axios": "^0.26.0",
     "dotenv": "^16.0.0",
