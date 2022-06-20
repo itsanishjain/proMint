@@ -20,6 +20,7 @@ export default function Home() {
   const [metadataURLIPFS, setMetadataURLIPFS] = useState("");
 
   const [nftUrl, setNftUrl] = useState(false);
+  const [CHAIN_ID, SET_CHAINID] = useState()
 
   const [NFT_CONTRACT_ADDRESS, SET_NFT_CONTRACT_ADDRESS] = useState()
 
@@ -80,6 +81,7 @@ export default function Home() {
     const provider = await web3ModalRef.current.connect();
     const web3Provider = new providers.Web3Provider(provider);
     const { chainId } = await web3Provider.getNetwork();
+    SET_CHAINID(chainId);
     if (chainId !== 4 && chainId !== 97 && chainId !== 80001) {
       toast.error("Change the network to Rinkeby OR Binance OR Mumbai")
       throw new Error("Change network to Rinkeby");
@@ -112,7 +114,11 @@ export default function Home() {
   const renderButton = () => {
     if (!walletConnected)
       return <Button text={"Connect your wallet"} onClick={connectWallet} />;
-    if (loading) return <Loader />;
+    if (loading) return (
+      <div className="flex justify-center items-center py-3">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700" />
+      </div>
+    );
     else {
       return <Button onClick={publicMint} text="Mint 🚀" />;
     }
@@ -132,12 +138,12 @@ export default function Home() {
 
       <img src="/banner.png" />
 
-      {nftUrl && (
+      {!nftUrl && (
 
         <div className="text-center text-white m-4">
           <a
             className="text-lg font-medium  text-white cursor-pointer underline"
-            href={`https://testnets.opensea.io/assets/${NFT_CONTRACT_ADDRESS}/${1}`}
+            href={`https://testnets.opensea.io/assets/${CHAIN_ID == 4 ? 'rinkeby' : 'mumbai'}/${NFT_CONTRACT_ADDRESS}/${1}`}
           >
             Here is your NFT ➡️
           </a>

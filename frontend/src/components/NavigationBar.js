@@ -16,12 +16,6 @@ export default function NavigationBar() {
             About
           </a>
         </Link>
-
-        <Link href="https://twitter.com/itsanishjain">
-          <a className="text-lg font-medium p-1 hover:bg-blue-400 hover:rounded">
-            Contact
-          </a>
-        </Link>
       </div>
     </nav>
   );

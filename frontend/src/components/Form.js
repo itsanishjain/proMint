@@ -67,12 +67,6 @@ export default function Form({ setMetadataURLIPFS }) {
           (
             !loading ?
               (
-                // <button
-                //   className="mt-2 border border-blue-500 p-4 rounded-lg text-black"
-                //   onClick={handleSubmit}
-                // >
-                //   UPLOAD
-                // </button>
                 <div
                   className="mt-8 max-w-sm mx-auto rounded-lg bg-gradient-to-r from-orange-300 to-orange-500 text-center font-semibold text-lg"
                   onClick={handleSubmit}
