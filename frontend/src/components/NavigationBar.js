@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import UnstoppableDomain from "./UnstoppableDomain";
 
 export default function NavigationBar() {
   return (
@@ -16,6 +17,7 @@ export default function NavigationBar() {
             About
           </a>
         </Link>
+        <UnstoppableDomain />
       </div>
     </nav>
   );
