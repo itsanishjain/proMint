@@ -72,7 +72,7 @@ const UnstoppableDomain = () => {
       className="text-lg font-medium p-1 hover:bg-blue-400 hover:rounded"
       onClick={handleLogin}
     >
-      Login with Unstoppable
+      Login with Unstoppable {process.env.NODE_ENV}
     </button>
   );
 };
