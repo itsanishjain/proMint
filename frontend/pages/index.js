@@ -38,6 +38,7 @@ export default function Home() {
     NFT_CONTRACT_ADDRESS,
     dropOption,
     getContractAddress,
+    UD,
   } = useContext(UserContext);
 
   const [loading, setLoading] = useState(false);
@@ -125,7 +126,10 @@ export default function Home() {
       return (
         <>
           <Button onClick={publicMint} text="Mint 🚀" />
-          <Button text={truncateAddress(account)} onClick={disconnect}></Button>
+          <Button
+            text={UD ? UD : truncateAddress(account)}
+            onClick={disconnect}
+          ></Button>
         </>
       );
     }

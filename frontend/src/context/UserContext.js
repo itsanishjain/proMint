@@ -1,7 +1,7 @@
 import { useWeb3React } from "@web3-react/core";
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useCallback } from "react";
 
-import { connectors } from "../utils/connectors";
+import { connectors, uauth } from "../utils/connectors";
 
 import Loader from "../components/Loader";
 
@@ -16,12 +16,14 @@ export const UserContext = createContext();
 export const UserContextProvider = ({ children }) => {
   const { account, activate, deactivate, chainId, library } = useWeb3React();
 
+  const [UD, setUD] = useState();
+
   const [isLoading, setIsLoading] = useState(true);
 
   const [NFT_CONTRACT_ADDRESS, SET_NFT_CONTRACT_ADDRESS] = useState();
   const [dropOption, setDropOption] = useState("Select Network");
 
-  const getContractAddress = () => {
+  const getContractAddress = useCallback(() => {
     if (chainId == 4) {
       SET_NFT_CONTRACT_ADDRESS(NFT_CONTRACT_RINKEBY_ADDRESS);
       setDropOption("Rinkeby");
@@ -34,19 +36,35 @@ export const UserContextProvider = ({ children }) => {
       SET_NFT_CONTRACT_ADDRESS(NFT_CONTRACT_POLYGON_ADDRESS);
       setDropOption("Mumbai");
     }
-  };
+  }, []);
 
   const disconnect = () => {
     localStorage.removeItem("provider");
+    setUD();
     deactivate();
   };
 
+  const getUD = () => {
+    uauth.uauth
+      .user()
+      .then((res) => {
+        setUD(res.sub);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   useEffect(() => {
-    activate(connectors[localStorage.getItem("provider")]).then(() => {
+    const walletName = localStorage.getItem("provider");
+    activate(connectors[walletName]).then(() => {
+      if (walletName == "uauth") {
+        getUD();
+      }
       setIsLoading(false);
       getContractAddress(chainId);
     });
-  }, [activate, chainId]);
+  }, [activate, chainId, getContractAddress]);
 
   return (
     <UserContext.Provider
@@ -61,6 +79,9 @@ export const UserContextProvider = ({ children }) => {
         NFT_CONTRACT_ADDRESS,
         dropOption,
         getContractAddress,
+        UD,
+        setUD,
+        getUD,
       }}
     >
       {isLoading ? <Loader /> : children}

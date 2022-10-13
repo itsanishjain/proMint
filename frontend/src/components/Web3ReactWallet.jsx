@@ -12,7 +12,7 @@ import unstoppable from "../../public/unstoppable.png";
 import { UserContext } from "../context/UserContext";
 
 const Web3ReactWallet = ({ setIsModalOpen }) => {
-  const { account, activate, disconnect, getContractAddress } =
+  const { account, activate, disconnect, getContractAddress, UD, getUD } =
     useContext(UserContext);
   const [loading, setLoading] = useState(false);
 
@@ -24,6 +24,8 @@ const Web3ReactWallet = ({ setIsModalOpen }) => {
       toast.error("Connection Rejected");
       console.log(err);
       isCancelled = true;
+    }).then(() => {
+      if (walletName === "uauth") getUD();
     });
     if (isCancelled) return;
 
@@ -79,7 +81,7 @@ const Web3ReactWallet = ({ setIsModalOpen }) => {
         </div>
       ) : (
         <>
-          <p>{truncateAddress(account)}</p>
+          <p>{UD ? UD : truncateAddress(account)}</p>
           <button
             className="text-black border-2 border-black p-4"
             onClick={disconnect}
